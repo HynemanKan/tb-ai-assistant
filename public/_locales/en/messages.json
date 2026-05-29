@@ -1,0 +1,113 @@
+{
+  "extensionName": {
+    "message": "AI Assistant"
+  },
+  "extensionDescription": {
+    "message": "Let AI read your mail first."
+  },
+  "optionsTitle": {
+    "message": "Settings"
+  },
+  "llmTypeLabel": {
+    "message": "LLM Provider"
+  },
+  "llmApiEndpointLabel": {
+    "message": "API Endpoint"
+  },
+  "llmApiKeyLabel": {
+    "message": "API Key"
+  },
+  "llmModelLabel": {
+    "message": "Model"
+  },
+  "testButton": {
+    "message": "Test"
+  },
+  "testingButton": {
+    "message": "Testing..."
+  },
+  "testSuccess": {
+    "message": "Connection successful"
+  },
+  "testFailed": {
+    "message": "Connection failed"
+  },
+  "toolEnableLabel": {
+    "message": "Enabled Tools"
+  },
+  "toolMailTag": {
+    "message": "Mail Tag"
+  },
+  "systemPromptLabel": {
+    "message": "System Prompt"
+  },
+  "systemPromptPlaceholder": {
+    "message": "Enter system prompt for the AI assistant..."
+  },
+  "tagDescriptionsLabel": {
+    "message": "Tag Descriptions"
+  },
+  "tagDescriptionsHint": {
+    "message": "Define descriptions for your mail tags. Uncheck a tag to disable AI tagging for it. These descriptions help AI understand when to apply each tag."
+  },
+  "tagDescriptionPlaceholder": {
+    "message": "Describe when this tag should be used..."
+  },
+  "noTagsFound": {
+    "message": "No mail tags found. Create tags in Thunderbird first."
+  },
+  "saveButton": {
+    "message": "Save"
+  },
+  "resetButton": {
+    "message": "Reset"
+  },
+  "saveSuccess": {
+    "message": "Settings saved successfully"
+  },
+  "saveError": {
+    "message": "Failed to save settings"
+  },
+  "configVersionLabel": {
+    "message": "Config Version"
+  },
+  "viewChatHistory": {
+    "message": "View Chat History"
+  },
+  "chatHistoryTitle": {
+    "message": "Chat History"
+  },
+  "refreshButton": {
+    "message": "Refresh"
+  },
+  "clearAllButton": {
+    "message": "Clear All"
+  },
+  "clearAllConfirm": {
+    "message": "Are you sure you want to delete all chat records?"
+  },
+  "loading": {
+    "message": "Loading..."
+  },
+  "noRecords": {
+    "message": "No chat records yet"
+  },
+  "deleteButton": {
+    "message": "Delete"
+  },
+  "userMessage": {
+    "message": "User Message"
+  },
+  "assistantResponse": {
+    "message": "Assistant Response"
+  },
+  "promptTokens": {
+    "message": "Prompt Tokens"
+  },
+  "completionTokens": {
+    "message": "Completion Tokens"
+  },
+  "totalTokens": {
+    "message": "Total Tokens"
+  }
+}

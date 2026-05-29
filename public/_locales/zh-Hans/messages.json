@@ -1,0 +1,113 @@
+{
+  "extensionName": {
+    "message": "AI助手"
+  },
+  "extensionDescription": {
+    "message": "让AI先帮你读一遍邮件。"
+  },
+  "optionsTitle": {
+    "message": "设置"
+  },
+  "llmTypeLabel": {
+    "message": "LLM 提供商"
+  },
+  "llmApiEndpointLabel": {
+    "message": "API 地址"
+  },
+  "llmApiKeyLabel": {
+    "message": "API 密钥"
+  },
+  "llmModelLabel": {
+    "message": "模型"
+  },
+  "testButton": {
+    "message": "测试"
+  },
+  "testingButton": {
+    "message": "测试中..."
+  },
+  "testSuccess": {
+    "message": "连接成功"
+  },
+  "testFailed": {
+    "message": "连接失败"
+  },
+  "toolEnableLabel": {
+    "message": "启用的工具"
+  },
+  "toolMailTag": {
+    "message": "邮件标签"
+  },
+  "systemPromptLabel": {
+    "message": "系统提示词"
+  },
+  "systemPromptPlaceholder": {
+    "message": "输入AI助手的系统提示词..."
+  },
+  "tagDescriptionsLabel": {
+    "message": "标签描述"
+  },
+  "tagDescriptionsHint": {
+    "message": "为邮件标签定义描述。取消勾选标签可禁用该标签的AI打标功能。这些描述帮助AI理解何时应该应用每个标签。"
+  },
+  "tagDescriptionPlaceholder": {
+    "message": "描述何时应使用此标签..."
+  },
+  "noTagsFound": {
+    "message": "未找到邮件标签。请先在Thunderbird中创建标签。"
+  },
+  "saveButton": {
+    "message": "保存"
+  },
+  "resetButton": {
+    "message": "重置"
+  },
+  "saveSuccess": {
+    "message": "设置保存成功"
+  },
+  "saveError": {
+    "message": "保存设置失败"
+  },
+  "configVersionLabel": {
+    "message": "配置版本"
+  },
+  "viewChatHistory": {
+    "message": "查看对话记录"
+  },
+  "chatHistoryTitle": {
+    "message": "对话记录"
+  },
+  "refreshButton": {
+    "message": "刷新"
+  },
+  "clearAllButton": {
+    "message": "清空全部"
+  },
+  "clearAllConfirm": {
+    "message": "确定要删除所有对话记录吗？"
+  },
+  "loading": {
+    "message": "加载中..."
+  },
+  "noRecords": {
+    "message": "暂无对话记录"
+  },
+  "deleteButton": {
+    "message": "删除"
+  },
+  "userMessage": {
+    "message": "用户消息"
+  },
+  "assistantResponse": {
+    "message": "AI 回复"
+  },
+  "promptTokens": {
+    "message": "输入 Tokens"
+  },
+  "completionTokens": {
+    "message": "输出 Tokens"
+  },
+  "totalTokens": {
+    "message": "总 Tokens"
+  }
+}
