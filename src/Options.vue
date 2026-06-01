@@ -16,6 +16,7 @@ import {
   TOOL_ENABLE,
   SYSTEM_PROMPT,
   TAG_DESCRIPTIONS,
+  SENDER_FILTER_RULES,
 } from "./utils/Config";
 import { testLLMConfig } from "./agent";
 import { TOOL_GROUP_MAP } from "./tools";
@@ -34,6 +35,7 @@ const mailTags = ref<MailTag[]>([]);
 
 const isTestingLLM = ref(false);
 const testResult = ref<{ success: boolean; response?: string; error?: string } | null>(null);
+const newFilterRule = ref("");
 
 function t(messageName: string): string {
   return browser.i18n.getMessage(messageName) || messageName;
@@ -155,6 +157,18 @@ function toggleTagEnabled(key: string) {
   config.value[TAG_DESCRIPTIONS][key].disabled = !config.value[TAG_DESCRIPTIONS][key].disabled;
 }
 
+function addFilterRule() {
+  const rule = newFilterRule.value.trim();
+  if (rule && !config.value[SENDER_FILTER_RULES].includes(rule)) {
+    config.value[SENDER_FILTER_RULES].push(rule);
+    newFilterRule.value = "";
+  }
+}
+
+function removeFilterRule(index: number) {
+  config.value[SENDER_FILTER_RULES].splice(index, 1);
+}
+
 onMounted(() => {
   loadConfig();
 });
@@ -256,6 +270,36 @@ onMounted(() => {
                 {{ toolName }}
               </span>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>{{ t("senderFilterRulesLabel") }}</label>
+        <p class="form-hint">{{ t("senderFilterRulesHint") }}</p>
+
+        <div class="filter-rules-input">
+          <input
+            type="text"
+            v-model="newFilterRule"
+            :placeholder="t('senderFilterPlaceholder')"
+            @keyup.enter="addFilterRule"
+          />
+          <button type="button" class="btn-add" @click="addFilterRule">
+            {{ t("addButton") }}
+          </button>
+        </div>
+
+        <div v-if="config[SENDER_FILTER_RULES].length > 0" class="filter-rules-list">
+          <div
+            v-for="(rule, index) in config[SENDER_FILTER_RULES]"
+            :key="index"
+            class="filter-rule-item"
+          >
+            <span class="filter-rule-text">{{ rule }}</span>
+            <button type="button" class="btn-remove" @click="removeFilterRule(index)">
+              ×
+            </button>
           </div>
         </div>
       </div>
@@ -671,6 +715,75 @@ textarea:disabled {
   text-align: center;
 }
 
+.filter-rules-input {
+  display: flex;
+  gap: 8px;
+}
+
+.filter-rules-input input {
+  flex: 1;
+}
+
+.btn-add {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  background-color: #3b82f6;
+  color: white;
+  white-space: nowrap;
+  transition: background-color 0.2s;
+}
+
+.btn-add:hover {
+  background-color: #2563eb;
+}
+
+.filter-rules-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.filter-rule-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background-color: #2a2a2a;
+  border: 1px solid #404040;
+  border-radius: 6px;
+}
+
+.filter-rule-text {
+  font-family: monospace;
+  color: #f0f0f0;
+}
+
+.btn-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  background-color: #ef4444;
+  color: white;
+  line-height: 1;
+  transition: background-color 0.2s;
+}
+
+.btn-remove:hover {
+  background-color: #dc2626;
+}
+
 @media (max-width: 600px) {
   .options-container {
     padding: 16px;
@@ -696,6 +809,10 @@ textarea:disabled {
   .btn-primary,
   .btn-secondary {
     width: 100%;
+  }
+
+  .filter-rules-input {
+    flex-direction: column;
   }
 }
 </style>

@@ -109,5 +109,17 @@
   },
   "totalTokens": {
     "message": "总 Tokens"
+  },
+  "senderFilterRulesLabel": {
+    "message": "发件人过滤规则"
+  },
+  "senderFilterRulesHint": {
+    "message": "添加邮箱地址或域名（如 @example.com），跳过AI处理来自这些发件人的邮件。"
+  },
+  "senderFilterPlaceholder": {
+    "message": "输入邮箱或 @域名"
+  },
+  "addButton": {
+    "message": "添加"
   }
 }

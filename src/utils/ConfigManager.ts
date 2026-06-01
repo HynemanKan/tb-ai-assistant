@@ -8,6 +8,7 @@ import {
   CONFIG_VERSION,
   SYSTEM_PROMPT,
   TAG_DESCRIPTIONS,
+  SENDER_FILTER_RULES,
   nowConfigVersion,
   LlmType,
   llmApiEndpoint,
@@ -18,6 +19,7 @@ import {
   systemPrompt,
   defaultSystemPrompt,
   tagDescriptions,
+  senderFilterRules,
   LLM_TYPES,
   TOOL_GROUPS,
 } from "./Config";
@@ -31,6 +33,7 @@ export const ConfigSchema = z.object({
   [CONFIG_VERSION]: configVersion,
   [SYSTEM_PROMPT]: systemPrompt,
   [TAG_DESCRIPTIONS]: tagDescriptions,
+  [SENDER_FILTER_RULES]: senderFilterRules,
 });
 
 export type Config = z.infer<typeof ConfigSchema>;
@@ -44,6 +47,7 @@ export const defaultConfig: Config = {
   [CONFIG_VERSION]: nowConfigVersion,
   [SYSTEM_PROMPT]: defaultSystemPrompt,
   [TAG_DESCRIPTIONS]: {},
+  [SENDER_FILTER_RULES]: [],
 };
 
 export async function getConfig(): Promise<Config> {

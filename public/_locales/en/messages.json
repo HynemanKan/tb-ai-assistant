@@ -109,5 +109,17 @@
   },
   "totalTokens": {
     "message": "Total Tokens"
+  },
+  "senderFilterRulesLabel": {
+    "message": "Sender Filter Rules"
+  },
+  "senderFilterRulesHint": {
+    "message": "Add email addresses or domains (e.g., @example.com) to skip AI processing for emails from these senders."
+  },
+  "senderFilterPlaceholder": {
+    "message": "Enter email or @domain"
+  },
+  "addButton": {
+    "message": "Add"
   }
 }

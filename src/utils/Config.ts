@@ -28,7 +28,7 @@ export const llmKeyEnable = z.array(z.enum(TOOL_GROUPS))
 
 export const CONFIG_VERSION = "NOW_CONFIG_VERSION"
 export const configVersion = z.number()
-export const nowConfigVersion = 4
+export const nowConfigVersion = 5
 
 export const SYSTEM_PROMPT = "SYSTEM_PROMPT"
 export const systemPrompt = z.string()
@@ -52,5 +52,8 @@ export const tagDescription = z.object({
     disabled: z.boolean().optional().default(false),
 })
 export const tagDescriptions = z.record(z.string(), tagDescription)
+
+export const SENDER_FILTER_RULES = "SENDER_FILTER_RULES"
+export const senderFilterRules = z.array(z.string())
 
 
