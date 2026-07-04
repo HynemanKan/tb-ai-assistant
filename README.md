@@ -1,96 +1,87 @@
+# TB AI Assistant
 
-This add-on is an example of using:
-* [Vue](https://vuejs.org/), [Vite](https://vite.dev/) and [TypeScript](https://www.typescriptlang.org/)
-* one of the [Experiments APIs](https://github.com/thunderbird/webext-support/tree/master/experiments/FileSystem)
+Thunderbird 邮件客户端 AI 助手扩展。自动分析收到的邮件，使用 AI 进行智能处理。
 
-Specifically, the add-on presents a popup window with two buttons.
-* One button to write a "hello" message with the current timestamp to a new file in the user's profile directory.
-* A second button to read the contents of that file
+## 功能
 
-In order to see the results, make sure to have either Error Console or Dev Tools open.
+- **邮件标签** - 自动分析邮件内容并添加合适的标签
+- **日历事件** - 从邮件中提取会议/预约信息，自动创建日历事件
+- **任务管理** - 识别邮件中的待办事项，自动创建任务
+- **发件人过滤** - 支持配置过滤规则，跳过特定发件人的邮件
+- **聊天记录** - 保存 AI 处理邮件的对话历史
 
-## Getting started
+## 支持的 LLM
 
-You will need to [install Node.js](https://nodejs.org/en/learn/getting-started/how-to-install-nodejs) (v20+).
+- OpenAI
+- Ollama (本地部署)
 
-You can use `npm`, `pnpm`, or `yarn`.
+## 安装
 
-Then:
-- `cd typescript-vue-experiment-api`
-- and install this project's dependencies: `npm i`
+1. 下载最新的 `.xpi` 文件
+2. 打开 Thunderbird → 附加组件和主题
+3. 点击齿轮图标 → 从文件安装附加组件
+4. 选择下载的 `.xpi` 文件
 
-## Compiling the add-on
+## 配置
 
-To compile the project:
+安装后，进入扩展的设置页面配置：
+
+- LLM 提供商类型 (OpenAI/Ollama)
+- API 端点地址
+- API 密钥
+- 模型名称
+- 系统提示词
+- 启用的工具组 (邮件标签/日历事件/任务管理)
+- 发件人过滤规则
+- 日历 ID 和任务列表 ID
+
+## 开发
+
+### 环境要求
+
+- Node.js v20+
+- pnpm
+
+### 安装依赖
 
 ```sh
-npm run build
+pnpm install
 ```
-### Optional: Rebuild on file change
 
-Alternatively, if you are using Linux, macOS, or WSL you can automatically rebuild the add-on when a `.vue`, `.js`, `.ts`, or `.json` file changes:
+### 开发构建
+
 ```sh
-# Make sure to install this first: https://github.com/eradman/entr
-npm run watch
+# 监听文件变化并自动重新构建
+pnpm run watch
 ```
 
-## Loading the add-on
+### 生产构建
 
-After compilation finishes, go to Thunderbird's "Debugging - Runtime" window and click "Load Temporary Add-on..".
-
-Choose the `manifest.json` file in the `dist` directory.
-
-
-## Notes
-
-* The addon-on will only run in Thunderbird (v128+)
-* The `watch` script relies on [entr](https://github.com/eradman/entr).
-
-## Additional information
-
-### `src/background.ts`
-
-The `manifest.json` specifies "background.js" as the background script. This file is not part of the repo; it is compiled from `src/background.ts`
-
-The `background.ts` script does the following:
-- Opens the Vue application in a popup window
-- Listens for messages from the Vue application
-
-Essentially, it acts as a "server", allowing the Vue application to focus on user interaction and styling.
-
-### `src/App.vue`
-
-This is the core of the Vue application. (Like any Vue application, you can add additional components and then import them into `App.vue`.)
-
-It uses the `sendMessage` function from `utils.ts` to send messages to `background.ts`. It can also receive responses from `background.ts`.
-
-For example, the `readFile` function sends a message and `await`s the response:
-
-```ts
-async function readFile() {
-  const contents = await sendMessage({ action: ACTIONS.READ });
-  console.log(`[readFile] read contents: ${contents}`);
-}
+```sh
+pnpm run build
 ```
 
-Here is the corresponding code from `background.ts`. The `return` value is used as the response.
-```ts
-if (request.action === ACTIONS.READ) {
-  // @ts-ignore
-  const contents = await browser.FileSystem.readFile("test123.txt");
-  return contents;
-}
+### 打包
+
+```sh
+pnpm run package
 ```
 
-(The `// @ts-ignore` is necessary since `FileSystem` isn't a standard property of the global `browser` (or `messenger`) object. It was added by the `experiment_apis` declared in the `manifest.json`.)
+## 加载扩展进行调试
 
+1. 运行 `pnpm run build`
+2. 打开 Thunderbird → 工具 → 开发者 → 调试附加组件
+3. 点击 "加载临时附加组件"
+4. 选择 `dist/manifest.json`
 
-### `vite.config.*` and `build.sh`
+## 技术栈
 
-There are two `vite` configuration files. The Vue app and the background script are treated as two different compilation targets.
+- [Vue 3](https://vuejs.org/)
+- [Vite](https://vite.dev/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [LangChain](https://github.com/langchain-ai/langchainjs)
+- [Thunderbird WebExtension APIs](https://thunderbird.net/en/developers/)
 
-The `build.sh` script runs `vite build` once for each of these targets.
+## 许可证
 
-## Bugs
-
-* The source map for `background.ts` does not load properly at this time.
+MIT
