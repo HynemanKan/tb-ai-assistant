@@ -29,12 +29,48 @@ function shouldFilterSender(sender: string, filterRules: string[]): boolean {
   return false;
 }
 
+async function buildEmailInfo(messageId: number): Promise<EmailInfo> {
+  const message = await messenger.messages.get(messageId);
+  const fullMessage = await messenger.messages.getFull(messageId);
+  const body = extractEmailContent(fullMessage);
+
+  return {
+    id: message.id,
+    subject: message.subject || "(No subject)",
+    author: message.author,
+    recipients: message.recipients || [],
+    date: message.date,
+    body: body,
+  };
+}
+
 async function main() {
   console.clear();
   console.info("TB AI Assistant starting...");
 
   await migrateConfig();
   console.info("Config migration check completed");
+
+  messenger.runtime.onMessage.addListener((message: any) => {
+    if (message?.action === "rerun") {
+      const messageId = message.messageId as number;
+      console.info("Rerun request received for message:", messageId);
+
+      return (async () => {
+        try {
+          const emailInfo = await buildEmailInfo(messageId);
+          const config = await getConfig();
+          console.info("Rerun processing email:", emailInfo.subject);
+          await processEmail(emailInfo, config);
+          console.info("Rerun completed for message:", messageId);
+          return { success: true };
+        } catch (error) {
+          console.error("Rerun failed:", error);
+          return { success: false, error: error instanceof Error ? error.message : String(error) };
+        }
+      })();
+    }
+  });
 
   console.info("Adding mail received listener");
   messenger.messages.onNewMailReceived.addListener(async (folder, messageList) => {
@@ -51,17 +87,7 @@ async function main() {
           continue;
         }
 
-        const fullMessage = await messenger.messages.getFull(message.id);
-        const body = extractEmailContent(fullMessage);
-
-        const emailInfo: EmailInfo = {
-          id: message.id,
-          subject: message.subject || "(No subject)",
-          author: message.author,
-          recipients: message.recipients || [],
-          date: message.date,
-          body: body,
-        };
+        const emailInfo = await buildEmailInfo(message.id);
 
         console.info("Processing email:", emailInfo.subject);
         await processEmail(emailInfo, config);

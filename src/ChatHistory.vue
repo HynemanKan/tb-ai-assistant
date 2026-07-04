@@ -11,6 +11,7 @@ import { LLM_TYPE, LLM_MODEL } from "./utils/Config";
 const chatRecords = ref<ChatRecord[]>([]);
 const isLoading = ref(true);
 const expandedId = ref<string | null>(null);
+const rerunningId = ref<string | null>(null);
 
 function t(messageName: string): string {
   return browser.i18n.getMessage(messageName) || messageName;
@@ -44,6 +45,26 @@ async function handleClearAll() {
     chatRecords.value = [];
   } catch (error) {
     console.error("Failed to clear records:", error);
+  }
+}
+
+async function handleRerun(record: ChatRecord) {
+  if (!record.messageId) {
+    alert("No message ID stored for this record, cannot rerun.");
+    return;
+  }
+
+  rerunningId.value = record.id;
+  try {
+    await browser.runtime.sendMessage({
+      action: "rerun",
+      messageId: record.messageId,
+    });
+  } catch (error) {
+    console.error("Failed to send rerun message:", error);
+    alert("Failed to rerun: " + (error instanceof Error ? error.message : String(error)));
+  } finally {
+    rerunningId.value = null;
   }
 }
 
@@ -106,6 +127,15 @@ onMounted(() => {
           <div class="record-preview">
             {{ truncateText(record.response) }}
           </div>
+          <button
+            v-if="record.messageId"
+            class="btn-icon btn-rerun"
+            :disabled="rerunningId === record.id"
+            @click.stop="handleRerun(record)"
+            :title="t('rerunButton')"
+          >
+            {{ rerunningId === record.id ? "..." : "↻" }}
+          </button>
           <button
             class="btn-icon btn-danger"
             @click.stop="handleDelete(record.id)"
@@ -367,6 +397,20 @@ onMounted(() => {
   justify-content: center;
   font-size: 12px;
   flex-shrink: 0;
+}
+
+.btn-rerun {
+  background-color: #1f3d5a;
+  color: #60a5fa;
+}
+
+.btn-rerun:hover:not(:disabled) {
+  background-color: #2a4f72;
+}
+
+.btn-rerun:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 @media (max-width: 600px) {

@@ -9,6 +9,8 @@ import {
   SYSTEM_PROMPT,
   TAG_DESCRIPTIONS,
   SENDER_FILTER_RULES,
+  CALENDAR_EVENT_ID,
+  CALENDAR_TASK_ID,
   nowConfigVersion,
   LlmType,
   llmApiEndpoint,
@@ -20,6 +22,8 @@ import {
   defaultSystemPrompt,
   tagDescriptions,
   senderFilterRules,
+  calendarEventId,
+  calendarTaskId,
   LLM_TYPES,
   TOOL_GROUPS,
 } from "./Config";
@@ -34,6 +38,8 @@ export const ConfigSchema = z.object({
   [SYSTEM_PROMPT]: systemPrompt,
   [TAG_DESCRIPTIONS]: tagDescriptions,
   [SENDER_FILTER_RULES]: senderFilterRules,
+  [CALENDAR_EVENT_ID]: calendarEventId,
+  [CALENDAR_TASK_ID]: calendarTaskId,
 });
 
 export type Config = z.infer<typeof ConfigSchema>;
@@ -48,6 +54,8 @@ export const defaultConfig: Config = {
   [SYSTEM_PROMPT]: defaultSystemPrompt,
   [TAG_DESCRIPTIONS]: {},
   [SENDER_FILTER_RULES]: [],
+  [CALENDAR_EVENT_ID]: "",
+  [CALENDAR_TASK_ID]: "",
 };
 
 export async function getConfig(): Promise<Config> {

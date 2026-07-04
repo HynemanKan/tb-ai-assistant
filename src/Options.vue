@@ -17,6 +17,8 @@ import {
   SYSTEM_PROMPT,
   TAG_DESCRIPTIONS,
   SENDER_FILTER_RULES,
+  CALENDAR_EVENT_ID,
+  CALENDAR_TASK_ID,
 } from "./utils/Config";
 import { testLLMConfig } from "./agent";
 import { TOOL_GROUP_MAP } from "./tools";
@@ -28,6 +30,13 @@ interface MailTag {
   ordinal: string;
 }
 
+interface CalendarInfo {
+  id: string;
+  name: string;
+  type: string;
+  enabled: boolean;
+}
+
 const config = ref<Config>({ ...defaultConfig });
 const statusMessage = ref("");
 const isLoading = ref(true);
@@ -36,6 +45,7 @@ const mailTags = ref<MailTag[]>([]);
 const isTestingLLM = ref(false);
 const testResult = ref<{ success: boolean; response?: string; error?: string } | null>(null);
 const newFilterRule = ref("");
+const calendars = ref<CalendarInfo[]>([]);
 
 function t(messageName: string): string {
   return browser.i18n.getMessage(messageName) || messageName;
@@ -48,6 +58,21 @@ async function loadMailTags() {
   } catch (error) {
     console.error("Failed to load mail tags:", error);
     mailTags.value = [];
+  }
+}
+
+async function loadCalendars() {
+  try {
+    const list = await (messenger as any).calendar.calendars.query({});
+    calendars.value = (list || []).map((c: any) => ({
+      id: c.id,
+      name: c.name,
+      type: c.type,
+      enabled: c.enabled,
+    }));
+  } catch (error) {
+    console.error("Failed to load calendars:", error);
+    calendars.value = [];
   }
 }
 
@@ -68,6 +93,7 @@ async function loadConfig() {
     config.value = await getConfig();
     await loadMailTags();
     cleanupDeletedTags();
+    await loadCalendars();
   } catch (error) {
     console.error("Failed to load config:", error);
     statusMessage.value = t("saveError");
@@ -122,6 +148,8 @@ function toggleTool(tool: string) {
 function getToolLabel(tool: string): string {
   const toolLabels: Record<string, string> = {
     MAIL_TAG: t("toolMailTag"),
+    CALENDAR_EVENT: t("toolCalendarEvent"),
+    CALENDAR_TASK: t("toolCalendarTask"),
   };
   return toolLabels[tool] || tool;
 }
@@ -271,6 +299,41 @@ onMounted(() => {
               </span>
             </div>
           </div>
+        </div>
+      </div>
+
+      <div v-if="config[TOOL_ENABLE].includes('CALENDAR_EVENT' as any) || config[TOOL_ENABLE].includes('CALENDAR_TASK' as any)" class="form-group">
+        <label>{{ t("calendarSettingsLabel") }}</label>
+        <p class="form-hint">{{ t("calendarSettingsHint") }}</p>
+
+        <div v-if="config[TOOL_ENABLE].includes('CALENDAR_EVENT' as any)" class="calendar-select-row">
+          <label :for="CALENDAR_EVENT_ID">{{ t("calendarEventLabel") }}</label>
+          <select :id="CALENDAR_EVENT_ID" v-model="config[CALENDAR_EVENT_ID]">
+            <option value="">{{ t("calendarSelectPlaceholder") }}</option>
+            <option
+              v-for="cal in calendars"
+              :key="cal.id"
+              :value="cal.id"
+              :disabled="!cal.enabled"
+            >
+              {{ cal.name }} ({{ cal.type }})
+            </option>
+          </select>
+        </div>
+
+        <div v-if="config[TOOL_ENABLE].includes('CALENDAR_TASK' as any)" class="calendar-select-row">
+          <label :for="CALENDAR_TASK_ID">{{ t("calendarTaskLabel") }}</label>
+          <select :id="CALENDAR_TASK_ID" v-model="config[CALENDAR_TASK_ID]">
+            <option value="">{{ t("calendarSelectPlaceholder") }}</option>
+            <option
+              v-for="cal in calendars"
+              :key="cal.id"
+              :value="cal.id"
+              :disabled="!cal.enabled"
+            >
+              {{ cal.name }} ({{ cal.type }})
+            </option>
+          </select>
         </div>
       </div>
 
@@ -587,6 +650,23 @@ textarea:disabled {
   border-radius: 4px;
   color: #d4d4d4;
   font-family: monospace;
+}
+
+.calendar-select-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.calendar-select-row label {
+  font-weight: 500;
+  font-size: 14px;
+  color: #d4d4d4;
+}
+
+.calendar-select-row select {
+  width: 100%;
 }
 
 .no-tags {

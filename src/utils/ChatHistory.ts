@@ -2,6 +2,7 @@ import type { ChatMessage } from "@/agent/llm";
 
 export interface ChatRecord {
   id: string;
+  messageId?: number;
   messages: ChatMessage[];
   response: string;
   createdAt: number;
@@ -47,12 +48,14 @@ export async function saveChatRecord(
   messages: ChatMessage[],
   response: string,
   metadata?: ChatRecord["metadata"],
-  customId?: string
+  customId?: string,
+  messageId?: number
 ): Promise<ChatRecord> {
   const db = await openDB();
 
   const record: ChatRecord = {
     id: customId || generateId(),
+    messageId,
     messages,
     response,
     createdAt: Date.now(),

@@ -38,6 +38,12 @@
   "toolMailTag": {
     "message": "邮件标签"
   },
+  "toolCalendarEvent": {
+    "message": "日历事件"
+  },
+  "toolCalendarTask": {
+    "message": "日历任务"
+  },
   "systemPromptLabel": {
     "message": "系统提示词"
   },
@@ -121,5 +127,23 @@
   },
   "addButton": {
     "message": "添加"
+  },
+  "rerunButton": {
+    "message": "重跑"
+  },
+  "calendarSettingsLabel": {
+    "message": "日历设置"
+  },
+  "calendarSettingsHint": {
+    "message": "选择用于创建事件和任务的日历。"
+  },
+  "calendarEventLabel": {
+    "message": "事件日历"
+  },
+  "calendarTaskLabel": {
+    "message": "任务日历"
+  },
+  "calendarSelectPlaceholder": {
+    "message": "-- 请选择日历 --"
   }
 }

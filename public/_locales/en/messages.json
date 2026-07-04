@@ -38,6 +38,12 @@
   "toolMailTag": {
     "message": "Mail Tag"
   },
+  "toolCalendarEvent": {
+    "message": "Calendar Events"
+  },
+  "toolCalendarTask": {
+    "message": "Calendar Tasks"
+  },
   "systemPromptLabel": {
     "message": "System Prompt"
   },
@@ -121,5 +127,23 @@
   },
   "addButton": {
     "message": "Add"
+  },
+  "rerunButton": {
+    "message": "Rerun"
+  },
+  "calendarSettingsLabel": {
+    "message": "Calendar Settings"
+  },
+  "calendarSettingsHint": {
+    "message": "Select which calendar to use for events and tasks."
+  },
+  "calendarEventLabel": {
+    "message": "Calendar for Events"
+  },
+  "calendarTaskLabel": {
+    "message": "Calendar for Tasks"
+  },
+  "calendarSelectPlaceholder": {
+    "message": "-- Select a calendar --"
   }
 }

@@ -16,7 +16,7 @@ export interface EmailInfo {
   body?: string;
 }
 
-const MAX_ITERATIONS = 10;
+const MAX_ITERATIONS = 20;
 
 function buildToolDefinitions(config: Config): string {
   const enabledGroups = config[TOOL_ENABLE];
@@ -44,7 +44,7 @@ function buildToolDefinitions(config: Config): string {
     return `## ${tool.name}\n${tool.description}\nParameters:\n${params}`;
   }).join("\n\n");
 
-  return `\n\nYou have access to the following tools:\n\n${toolDescriptions}\n\nTo use a tool, respond with a JSON object in this format:\n{"tool": "tool_name", "args": {...}}\n\nWhen you are done with all tasks, respond with "END" on a new line.`;
+  return `\n\nYou have access to the following tools:\n\n${toolDescriptions}\n\nTo use a tool, respond with a JSON object in this format:\n{"tool": "tool_name", "args": {...}}\n\nIMPORTANT: All string values in the JSON must be properly escaped. Escape double quotes inside strings with \\". Do NOT use raw Chinese quotation marks like \u201c\u201d inside JSON strings - use regular escaped quotes or remove them.\nIMPORTANT: You may only call ONE tool per response. Do not output multiple JSON objects.\nWhen you are done with all tasks, respond with "END" on a new line.`;
 }
 
 function buildEmailContent(email: EmailInfo): string {
@@ -56,19 +56,93 @@ Date: ${email.date.toLocaleString()}
 ${email.body || "(No body content)"}`;
 }
 
-function parseToolCall(content: string): { name: string; args: Record<string, any> } | null {
+function tryLenientParse(str: string): Record<string, any> | null {
+  let fixed = str;
+  fixed = fixed.replace(/\u201c|\u201d/g, '\\"');
+  fixed = fixed.replace(/\u2018|\u2019/g, "\\'");
   try {
-    const match = content.match(/\{"tool":\s*"([^"]+)",\s*"args":\s*(\{[^}]*\})\}/);
-    if (match) {
-      return {
-        name: match[1],
-        args: JSON.parse(match[2]),
-      };
+    return JSON.parse(fixed);
+  } catch {
+    // ignore
+  }
+
+  const kvPairs: Record<string, any> = {};
+  const keyRegex = /"(\w+)"\s*:\s*/g;
+  let m: RegExpExecArray | null;
+  const keys: { name: string; idx: number }[] = [];
+
+  while ((m = keyRegex.exec(str)) !== null) {
+    keys.push({ name: m[1], idx: m.index + m[0].length });
+  }
+
+  for (let i = 0; i < keys.length; i++) {
+    const start = keys[i].idx;
+    const end = i + 1 < keys.length ? str.lastIndexOf(",", keys[i + 1].idx) : str.lastIndexOf("}");
+    let val = str.slice(start, end).trim();
+
+    if (val.startsWith('"') && val.endsWith('"')) {
+      val = val.slice(1, -1);
+    } else if (val === "true") {
+      kvPairs[keys[i].name] = true;
+      continue;
+    } else if (val === "false") {
+      kvPairs[keys[i].name] = false;
+      continue;
+    } else if (!isNaN(Number(val))) {
+      kvPairs[keys[i].name] = Number(val);
+      continue;
+    }
+
+    val = val.replace(/\u201c|\u201d/g, '"').replace(/\u2018|\u2019/g, "'");
+    kvPairs[keys[i].name] = val;
+  }
+
+  return Object.keys(kvPairs).length > 0 ? kvPairs : null;
+}
+
+function parseToolCalls(content: string): { name: string; args: Record<string, any> }[] {
+  const calls: { name: string; args: Record<string, any> }[] = [];
+  try {
+    const regex = /\{"tool"\s*:\s*"([^"]+)"\s*,\s*"args"\s*:\s*\{/g;
+    let match: RegExpExecArray | null;
+
+    while ((match = regex.exec(content)) !== null) {
+      const toolName = match[1];
+      const argsStart = match.index + match[0].length - 1;
+      let depth = 0;
+      let argsEnd = -1;
+
+      for (let i = argsStart; i < content.length; i++) {
+        if (content[i] === "{") depth++;
+        else if (content[i] === "}") {
+          depth--;
+          if (depth === 0) {
+            argsEnd = i + 1;
+            break;
+          }
+        }
+      }
+
+      if (argsEnd === -1) continue;
+
+      const argsStr = content.slice(argsStart, argsEnd);
+      try {
+        const args = JSON.parse(argsStr);
+        calls.push({ name: toolName, args });
+      } catch {
+        console.warn("Strict JSON parse failed, trying lenient parse for:", toolName);
+        const args = tryLenientParse(argsStr);
+        if (args) {
+          calls.push({ name: toolName, args });
+        } else {
+          console.error("Failed to parse args for tool:", toolName, argsStr);
+        }
+      }
     }
   } catch (e) {
-    console.error("Failed to parse tool call:", e);
+    console.error("Failed to parse tool calls:", e);
   }
-  return null;
+  return calls;
 }
 
 export async function processEmail(email: EmailInfo, config: Config): Promise<void> {
@@ -117,37 +191,37 @@ export async function processEmail(email: EmailInfo, config: Config): Promise<vo
         break;
       }
 
-      const toolCall = parseToolCall(result.content);
-      if (toolCall) {
+      const toolCalls = parseToolCalls(result.content);
+      if (toolCalls.length > 0) {
+        // Only process the first tool call
+        const toolCall = toolCalls[0];
+        const ctx: ToolContext = {
+          messageHeader: {
+            id: email.id,
+            date: email.date,
+            author: email.author,
+            recipients: email.recipients,
+            subject: email.subject,
+          },
+          config,
+        };
+
         console.log("Tool Call:", toolCall.name, toolCall.args);
 
         const tool = getTool(toolCall.name);
+        let toolResult: any;
         if (tool) {
-          const ctx: ToolContext = {
-            messageHeader: {
-              id: email.id,
-              date: email.date,
-              author: email.author,
-              recipients: email.recipients,
-              subject: email.subject,
-            },
-            config,
-          };
-
-          const toolResult = await tool.execute(toolCall.args, ctx);
-          console.log("Tool Result:", toolResult);
-
-          messages.push({
-            role: "user",
-            content: `Tool ${toolCall.name} result: ${JSON.stringify(toolResult)}`,
-          });
+          toolResult = await tool.execute(toolCall.args, ctx);
+          console.log("Tool Result:", toolCall.name, toolResult);
         } else {
           console.error("Tool not found:", toolCall.name);
-          messages.push({
-            role: "user",
-            content: `Error: Tool "${toolCall.name}" not found.`,
-          });
+          toolResult = { error: "Tool not found" };
         }
+
+        messages.push({
+          role: "user",
+          content: `${toolCall.name}: ${JSON.stringify(toolResult)}`,
+        });
       } else {
         console.log("No tool call detected, ending conversation");
         isDone = true;
@@ -170,7 +244,8 @@ export async function processEmail(email: EmailInfo, config: Config): Promise<vo
         provider: config[LLM_TYPE],
         usage: totalUsage,
       },
-      recordId
+      recordId,
+      email.id
     );
 
     console.log("Chat record saved:", recordId);
@@ -184,7 +259,8 @@ export async function processEmail(email: EmailInfo, config: Config): Promise<vo
         model: config[LLM_MODEL],
         provider: config[LLM_TYPE],
       },
-      recordId
+      recordId,
+      email.id
     );
   }
 }
